@@ -31,7 +31,7 @@ def start_connections(host, port, num_conns):
 def introduccion_datos(key):
     client_socket = key.fileobj
 
-    print('Introduzca los siguientes datos: temperatura mínima, temperatura máxima, presión y pluviometría')
+    print('Introduzca los siguientes datos meteorológicos: temperatura mínima, temperatura máxima, presión y pluviometría')
 
     lista_datos=[]
 

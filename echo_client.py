@@ -7,7 +7,7 @@ def client_program():
     client_socket = socket.socket()  # instantiate
     client_socket.connect((host, port))  # connect to the server
 
-    print('Introduzca los siguientes datos: temperatura mínima, temperatura máxima, presión y pluviometría')
+    print('Introduzca los siguientes datos meteorológicos: temperatura mínima, temperatura máxima, presión y pluviometría')
 
     lista_datos=[]
 
