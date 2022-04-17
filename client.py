@@ -28,13 +28,31 @@ def start_connections(host, port, num_conns):
         for key, mask in events:
             service_connection(key, mask)
 
-def introduccion_datos(host, port):
-    client_socket = socket.socket()  # instantiate
-    client_socket.connect((host, port))  # connect to the server
+def introduccion_datos(key):
+    client_socket = key.fileobj
 
     print('Introduzca los siguientes datos: temperatura mínima, temperatura máxima, presión y pluviometría')
 
-    message = input(" -> ")  # take input
+    lista_datos=[]
+
+    message = input(" -> ")
+    temp_min=int(message)
+    lista_datos.append(temp_min)
+
+    message = input(" -> ")
+    temp_max=int(message)
+    lista_datos.append(temp_max)
+
+    message = input(" -> ")
+    presion=int(message)
+    lista_datos.append(presion)
+
+    message = input(" -> ")
+    pluvi=int(message)
+    lista_datos.append(pluvi)
+
+    #mensaje para parar la conexión cuando se han introducido los datos
+    message = input(" -> ")
 
     while message.lower().strip() != 'fin':
         client_socket.send(message.encode())  # send message
@@ -45,6 +63,7 @@ def introduccion_datos(host, port):
         message = input(" -> ")  # again take input
 
     client_socket.close()  # close the connection
+    print(lista_datos)
 
 def service_connection(key, mask):
     sock = key.fileobj
@@ -52,6 +71,7 @@ def service_connection(key, mask):
 
     if mask & selectors.EVENT_READ:
         recv_data = sock.recv(BUFFER_SIZE) # Debe estar listo para lectura
+        introduccion_datos(key)
 
         if recv_data:
             print('Recibido {} de conexión {}'.format(repr(recv_data), data.connid))
@@ -65,7 +85,7 @@ def service_connection(key, mask):
     if mask & selectors.EVENT_WRITE:
         if not data.outb and data.messages:
             data.outb = data.messages.pop(0)
-            introduccion_datos(host,port)
+            introduccion_datos(key)
 
         if data.outb:
             print('Enviando {} a conexión {}'.format(repr(data.outb), data.connid))

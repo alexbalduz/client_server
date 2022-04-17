@@ -17,9 +17,6 @@ def server_program():
         if not data:
             # if data is not received break
             break
-        print("from connected user: " + str(data))
-        data = input(' -> ')
-        conn.send(data.encode())  # send data to the client
     conn.close()
 
 if __name__ == '__main__':
