@@ -11,6 +11,7 @@ def accept_conn(sock):
 
     # Ponemos el socket en modo de no-bloqueo
     conn.setblocking(False)
+
     data = types.SimpleNamespace(addr=addr, inb=b'', outb=b'')
     events = selectors.EVENT_READ | selectors.EVENT_WRITE
     selector.register(conn, events, data=data)
@@ -66,7 +67,6 @@ if __name__ == '__main__':
             #si no es None, entonces el socket ya ha sido aceptado y se tendrá que servir al cliente
             else:
                 service_conn(key, mask)
-
-    socket_tcp.close()
+                socket_tcp.close()
 
     print('Conexión terminada.')

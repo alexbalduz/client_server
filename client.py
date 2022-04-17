@@ -13,9 +13,11 @@ def start_connections(host, port, num_conns):
         connid = i + 1
         print('Iniciando conexión {} hacia {}'.format(connid, server_address))
         socket_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
         # Conectamos usando connect_ex() en lugar de connect()
         # connect() retorna una excepcion
         # connect_ex() retorna un aviso de error
+
         socket_tcp.connect_ex(server_address)
         events = selectors.EVENT_READ | selectors.EVENT_WRITE
 
