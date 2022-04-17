@@ -36,19 +36,19 @@ def introduccion_datos(key):
     lista_datos=[]
 
     message = input(" -> ")
-    temp_min=int(message)
+    temp_min=float(message)
     lista_datos.append(temp_min)
 
     message = input(" -> ")
-    temp_max=int(message)
+    temp_max=float(message)
     lista_datos.append(temp_max)
 
     message = input(" -> ")
-    presion=int(message)
+    presion=float(message)
     lista_datos.append(presion)
 
     message = input(" -> ")
-    pluvi=int(message)
+    pluvi=float(message)
     lista_datos.append(pluvi)
 
     #mensaje para parar la conexión cuando se han introducido los datos
