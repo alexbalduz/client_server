@@ -32,7 +32,7 @@ def accept_wrapper(sock):
 
 sel = selectors.DefaultSelector()
 
-host, port = sys.argv[1], int(sys.argv[2])
+host, port = '127.0.0.1', 65432
 lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 lsock.bind((host, port))
 lsock.listen()
