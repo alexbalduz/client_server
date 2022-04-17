@@ -1,42 +1,72 @@
 #Se importa los módulos
 import socket
-import sys
+import selectors
+import types
 
-#instanciamos un objeto para trabajar con el socket
-socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+selector = selectors.DefaultSelector()
 
-#Puerto y servidor que debe escuchar
-server_address = ('localhost', 10000)
+def accept_conn(sock):
+    conn, addr = sock.accept()
+    print('Conexión aceptada en {}'.format(addr))
 
-#Aceptamos conexiones entrantes con el metodo listen. Por parámetro las conexiones simutáneas.
-socket.bind(server_address)
+    # Ponemos el socket en modo de no-bloqueo
+    conn.setblocking(False)
+    data = types.SimpleNamespace(addr=addr, inb=b'', outb=b'')
+    events = selectors.EVENT_READ | selectors.EVENT_WRITE
+    selector.register(conn, events, data=data)
 
-#print >>sys.stderr, 'empezando a levantar %s puerto %s' % server_address
+def service_conn(key, mask):
+    sock = key.fileobj
+    data = key.data
 
-# poner socket a modo de servidor
-socket.listen(1)
+    if mask & selectors.EVENT_READ:
+        recv_data = sock.recv(BUFFER_SIZE)
 
-while True:
-    # Esperando conexion
-    #print >>sys.stderr, 'Esperando para conectarse'
+        if recv_data:
+            data.outb += recv_data
+        else:
+            print('Cerrando conexion en {}'.format(data.addr))
+            selector.unregister(sock)
+            sock.close()
 
-    #accept, acepta una conexión
-    connection, client_address = socket.accept()
+    if mask & selectors.EVENT_WRITE:
+        if data.outb:
+            print('Echo desde {} a {}'.format(repr(data.outb), data.addr))
+            sent = sock.send(data.outb)
+            #data ya comentado en otra clase
+            data.outb = data.outb[sent:]
 
-    try:
-        #print >>sys.stderr, 'concexion desde', client_address
+if __name__ == '__main__':
+    host = socket.gethostname() # Esta función nos da el nombre de la máquina
+    port = 12345
+    BUFFER_SIZE = 1024 # Usamos un número pequeño para tener una respuesta rápida
 
-        # Recibe los datos en trozos y reetransmite
-        while True:
-            data = connection.recv(19)
-            #print >>sys.stderr, 'recibido "%s"' % data
-            if data:
-                #print >>sys.stderr, 'enviando mensaje de vuelta al cliente'
-                connection.sendall(data)
+    # Creamos un socket TCP
+    socket_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    # Configuramos el socket en modo de no-bloqueo
+    socket_tcp.setblocking(False)
+    socket_tcp.bind((host, port))
+    socket_tcp.listen()
+    print('Socket abierto en {} {}'.format(host, port))
+
+    #con esta diferencia, el servidor no se podrá bloquear
+    socket_tcp.setblocking(False)
+
+    # Registramos el socket para que sea monitoreado por las funciones selector,.select()
+    selector.register(socket_tcp, selectors.EVENT_READ, data=None)
+
+    while socket_tcp:
+        events = selector.select(timeout=None)
+        for key, mask in events:
+            #tenemos dos opciones, que la tupla sea None
+            #entonces, entonces de la función listen, se tendrá que aceptar la conexión
+            if key.data is None:
+                accept_conn(key.fileobj)
+            #si no es None, entonces el socket ya ha sido aceptado y se tendrá que servir al cliente
             else:
-                #print >>sys.stderr, 'no hay mas datos', client_address
-                break
+                service_conn(key, mask)
 
-    finally:
-        # Cerrando conexion
-        connection.close()
+    socket_tcp.close()
+
+    print('Conexión terminada.')
