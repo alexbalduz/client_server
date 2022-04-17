@@ -28,6 +28,24 @@ def start_connections(host, port, num_conns):
         for key, mask in events:
             service_connection(key, mask)
 
+def introduccion_datos(host, port):
+    client_socket = socket.socket()  # instantiate
+    client_socket.connect((host, port))  # connect to the server
+
+    print('Introduzca los siguientes datos: temperatura mínima, temperatura máxima, presión y pluviometría')
+
+    message = input(" -> ")  # take input
+
+    while message.lower().strip() != 'fin':
+        client_socket.send(message.encode())  # send message
+        data = client_socket.recv(1024).decode()  # receive response
+
+        print('Received from server: ' + data)  # show in terminal
+
+        message = input(" -> ")  # again take input
+
+    client_socket.close()  # close the connection
+
 def service_connection(key, mask):
     sock = key.fileobj
     data = key.data
@@ -47,6 +65,7 @@ def service_connection(key, mask):
     if mask & selectors.EVENT_WRITE:
         if not data.outb and data.messages:
             data.outb = data.messages.pop(0)
+            introduccion_datos(host,port)
 
         if data.outb:
             print('Enviando {} a conexión {}'.format(repr(data.outb), data.connid))
@@ -57,4 +76,4 @@ if __name__ == '__main__':
     host = socket.gethostname() # Esta función nos da el nombre de la máquina
     port = 12345
     BUFFER_SIZE = 1024 # Usamos un número pequeño para tener una respuesta rápida
-    start_connections(host, port, 2) 
+    start_connections(host, port, 2)
