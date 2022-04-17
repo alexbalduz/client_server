@@ -1,27 +1,29 @@
-#Variables
-host = 'localhost'
-port = 8050
-
-#Se importa el módulo
+#Se importa los módulos
 import socket
+import sys
 
-#Creación de un objeto socket (lado cliente)
-obj = socket.socket()
+#instanciamos un objeto para trabajar con el socket(lado cliente)
+socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-#Conexión con el servidor. Parametros: IP (puede ser del tipo 192.168.1.1 o localhost), Puerto
-obj.connect((host, port))
-print("Conectado al servidor")
+# Conecta el socket en el puerto cuando el servidor esté escuchando
+server_address = ('localhost', 10000)
+print >>sys.stderr, 'conectando a %s puerto %s' % server_address
+socket.connect(server_address)
 
-#Creamos un bucle para retener la conexion
-while True:
-    #Instanciamos una entrada de datos para que el cliente pueda enviar mensajes
-    mens = raw_input("Mensaje desde Cliente a Servidor >> ")
+try:
+    # Enviando datos
+    message = 'Este es el mensaje.  Se repitio.'
+    print >>sys.stderr, 'enviando "%s"' % message
+    socket.sendall(message)
+    # Buscando respuesta
+    amount_received = 0
+    amount_expected = len(message)
 
-    #Con el método send, enviamos el mensaje
-    obj.send(mens)
+    while amount_received < amount_expected:
+        data = socket.recv(19)
+        amount_received += len(data)
+        print >>sys.stderr, 'recibiendo "%s"' % data
 
-#Cerramos la instancia del objeto servidor
-obj.close()
-
-#Imprimimos la palabra Adios para cuando se cierre la conexion
-print("Conexión cerrada")
+finally:
+    print >>sys.stderr, 'cerrando socket'
+    socket.close()
